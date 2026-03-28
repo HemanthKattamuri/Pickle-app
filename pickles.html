@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pickle Jar — Artisan Pickles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #1a3a1a;
+    --green-mid: #2d5a27;
+    --green-bright: #4a8c3f;
+    --green-lime: #8bc34a;
+    --yellow-brine: #d4b44a;
+    --cream: #f5f0e8;
+    --off-white: #faf8f2;
+    --dill: #6b8f3e;
+    --brown-jar: #8b5e3c;
+    --text-dark: #1a2e1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--off-white);
+    color: var(--text-dark);
+    font-family: 'Libre Baskerville', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ====== NAV ====== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    background: rgba(245, 240, 232, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(75, 140, 63, 0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--green-deep);
+    letter-spacing: -0.02em;
+  }
+
+  .nav-logo span { color: var(--green-bright); font-style: italic; }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--green-deep);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--green-bright); }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--green-deep);
+    color: var(--cream);
+    border: none;
+    padding: 0.65rem 1.4rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .nav-cta:hover { background: var(--green-bright); transform: translateY(-1px); }
+
+  /* ====== HERO ====== */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    background: var(--green-deep);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 5rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(75,140,63,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--green-lime);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--cream);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--yellow-brine);
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.65);
+    max-width: 400px;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.6s forwards;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.8s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: var(--yellow-brine);
+    color: var(--green-deep);
+    border: none;
+    padding: 1rem 2.2rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,180,74,0.35); }
+
+  .btn-secondary {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: transparent;
+    color: var(--cream);
+    border: 1px solid rgba(245,240,232,0.3);
+    padding: 1rem 2.2rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--cream); background: rgba(245,240,232,0.06); }
+
+  .hero-badge {
+    position: absolute;
+    bottom: 3rem; left: 5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    opacity: 0;
+    animation: fadeUp 0.7s 1s forwards;
+  }
+
+  /* HERO RIGHT — big pickle illustration */
+  .hero-right {
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 50%, rgba(139,195,74,0.12) 0%, transparent 65%);
+  }
+
+  .pickle-hero-svg {
+    width: 340px;
+    height: 340px;
+    animation: floatPickle 4s ease-in-out infinite;
+    filter: drop-shadow(0 30px 40px rgba(26,58,26,0.18));
+    opacity: 0;
+    animation: floatPickle 4s 1s ease-in-out infinite, fadeIn 0.8s 0.9s forwards;
+  }
+
+  .hero-tag {
+    position: absolute;
+    top: 2.5rem; right: 2.5rem;
+    background: var(--green-deep);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    right: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(26,58,26,0.4);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, rgba(26,58,26,0.4), transparent);
+    animation: scrollLine 1.5s ease-in-out infinite;
+  }
+
+  /* ====== MARQUEE ====== */
+  .marquee-section {
+    background: var(--green-bright);
+    padding: 1rem 0;
+    overflow: hidden;
+    border-top: 1px solid var(--green-mid);
+    border-bottom: 1px solid var(--green-mid);
+  }
+
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+
+  .marquee-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .marquee-dot {
+    width: 5px; height: 5px;
+    background: var(--yellow-brine);
+    border-radius: 50%;
+  }
+
+  /* ====== ABOUT STRIP ====== */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 60vh;
+  }
+
+  .about-text {
+    padding: 7rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--green-bright);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--green-deep);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title em { font-style: italic; color: var(--green-bright); }
+
+  .section-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #4a5a3a;
+    max-width: 440px;
+    margin-bottom: 2.5rem;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 3rem;
+    margin-top: 1rem;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--green-deep);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #7a8a6a;
+  }
+
+  .about-visual {
+    background: var(--green-deep);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .about-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 70%, rgba(75,140,63,0.4) 0%, transparent 60%);
+  }
+
+  .jar-svg {
+    width: 260px;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== PRODUCTS ====== */
+  .products {
+    padding: 7rem 5rem;
+    background: var(--off-white);
+  }
+
+  .products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 4rem;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .product-card {
+    background: var(--cream);
+    border: 1px solid rgba(75,140,63,0.12);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(26,58,26,0.12);
+  }
+
+  .product-card:nth-child(2) { margin-top: 2rem; }
+  .product-card:nth-child(3) { margin-top: -1rem; }
+
+  .product-img {
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-img svg { width: 160px; transition: transform 0.3s; }
+  .product-card:hover .product-img svg { transform: scale(1.05) rotate(-3deg); }
+
+  .product-info {
+    padding: 1.8rem;
+    border-top: 1px solid rgba(75,140,63,0.12);
+  }
+
+  .product-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--green-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .product-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--green-deep);
+    margin-bottom: 0.5rem;
+  }
+
+  .product-desc {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #6a7a5a;
+    margin-bottom: 1.2rem;
+  }
+
+  .product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .product-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--green-deep);
+  }
+
+  .add-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--green-deep);
+    color: var(--cream);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .add-btn:hover { background: var(--green-bright); }
+
+  /* ====== PROCESS ====== */
+  .process {
+    background: var(--green-deep);
+    padding: 7rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .process::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(75,140,63,0.2) 0%, transparent 70%);
+  }
+
+  .process .section-label { color: var(--yellow-brine); }
+  .process .section-title { color: var(--cream); max-width: 500px; margin-bottom: 5rem; }
+  .process .section-title em { color: var(--green-lime); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 2.5rem; left: 2rem; right: 2rem;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(139,195,74,0.3) 20%, rgba(139,195,74,0.3) 80%, transparent);
+  }
+
+  .step { position: relative; }
+
+  .step-num {
+    width: 5rem; height: 5rem;
+    background: var(--green-mid);
+    border: 1px solid rgba(139,195,74,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--green-lime);
+    margin-bottom: 1.5rem;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.7rem;
+  }
+
+  .step-desc {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.5);
+  }
+
+  /* ====== TESTIMONIALS ====== */
+  .testimonials {
+    padding: 7rem 5rem;
+    background: var(--cream);
+  }
+
+  .testimonials-header { text-align: center; margin-bottom: 4rem; }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .tcard {
+    background: var(--off-white);
+    border: 1px solid rgba(75,140,63,0.1);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .tcard::before {
+    content: '"';
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    color: rgba(75,140,63,0.1);
+    position: absolute;
+    top: -1rem; left: 1.5rem;
+    line-height: 1;
+  }
+
+  .tcard-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #4a5a3a;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tcard-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .tcard-avatar {
+    width: 42px; height: 42px;
+    background: var(--green-deep);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--yellow-brine);
+    font-weight: 700;
+  }
+
+  .tcard-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green-deep);
+  }
+
+  .tcard-location {
+    font-size: 0.78rem;
+    color: #7a8a6a;
+  }
+
+  .stars { color: var(--yellow-brine); font-size: 0.75rem; margin-bottom: 0.3rem; }
+
+  /* ====== CTA BANNER ====== */
+  .cta-banner {
+    background: var(--yellow-brine);
+    padding: 6rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--green-deep);
+    line-height: 1.15;
+  }
+
+  .cta-title em { font-style: italic; }
+
+  .cta-subtitle {
+    font-size: 0.95rem;
+    color: rgba(26,58,26,0.65);
+    margin-top: 0.8rem;
+    max-width: 500px;
+  }
+
+  .btn-dark {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: var(--green-deep);
+    color: var(--cream);
+    border: none;
+    padding: 1.1rem 2.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-dark:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(26,58,26,0.25); }
+
+  /* ====== FOOTER ====== */
+  footer {
+    background: var(--green-deep);
+    padding: 5rem 5rem 3rem;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 4rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid rgba(245,240,232,0.1);
+  }
+
+  .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+
+  .footer-brand span { color: var(--yellow-brine); font-style: italic; }
+
+  .footer-tagline {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.45);
+    max-width: 280px;
+  }
+
+  .footer-col-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--green-lime);
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+  .footer-links a {
+    font-size: 0.88rem;
+    color: rgba(245,240,232,0.5);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--cream); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(245,240,232,0.25);
+  }
+
+  .social-row { display: flex; gap: 1rem; }
+  .social-btn {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(245,240,232,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(245,240,232,0.4);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .social-btn:hover { border-color: var(--yellow-brine); color: var(--yellow-brine); }
+
+  /* ====== ANIMATIONS ====== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes floatPickle {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-18px) rotate(2deg); }
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes scrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* Intersection Observer fade-in */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">The <span>Pickle</span> Jar</div>
+  <ul class="nav-links">
+    <li><a href="#products">Shop</a></li>
+    <li><a href="#process">Our Craft</a></li>
+    <li><a href="#about">Story</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-cta">Order Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">🥒 Small-batch · Naturally fermented</p>
+    <h1 class="hero-title">
+      Boldly<br><em>Brined.</em><br>Wildly<br>Good.
+    </h1>
+    <p class="hero-desc">
+      Crafted in small batches using heirloom cucumbers, fresh dill, and time-honored brining traditions passed down through generations.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop the Jars</button>
+      <button class="btn-secondary" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})">Our Story</button>
+    </div>
+    <p class="hero-badge">Est. 1987 · Handcrafted with love</p>
+  </div>
+  <div class="hero-right">
+    <div class="hero-tag">Fan Favourite</div>
+    <!-- Big Pickle SVG -->
+    <svg class="pickle-hero-svg" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Glow -->
+      <ellipse cx="170" cy="290" rx="80" ry="18" fill="rgba(75,140,63,0.2)"/>
+      <!-- Body -->
+      <ellipse cx="170" cy="170" rx="62" ry="130" fill="#3a7a30"/>
+      <ellipse cx="170" cy="170" rx="58" ry="126" fill="#4a9040"/>
+      <!-- Skin texture bumps -->
+      <circle cx="148" cy="120" r="7" fill="#5aaa4e" opacity="0.7"/>
+      <circle cx="192" cy="140" r="6" fill="#5aaa4e" opacity="0.7"/>
+      <circle cx="155" cy="165" r="8" fill="#3a7a30" opacity="0.5"/>
+      <circle cx="188" cy="185" r="5" fill="#5aaa4e" opacity="0.7"/>
+      <circle cx="145" cy="200" r="7" fill="#5aaa4e" opacity="0.7"/>
+      <circle cx="180" cy="220" r="6" fill="#3a7a30" opacity="0.5"/>
+      <circle cx="158" cy="240" r="5" fill="#5aaa4e" opacity="0.7"/>
+      <circle cx="170" cy="100" r="5" fill="#5aaa4e" opacity="0.6"/>
+      <!-- Vertical ridges/lines -->
+      <path d="M152 55 Q148 170 155 285" stroke="#3a7a30" stroke-width="2.5" opacity="0.6" fill="none"/>
+      <path d="M168 44 Q164 170 168 296" stroke="#3a7a30" stroke-width="2" opacity="0.5" fill="none"/>
+      <path d="M184 50 Q188 170 182 288" stroke="#3a7a30" stroke-width="2.5" opacity="0.6" fill="none"/>
+      <!-- Highlight -->
+      <ellipse cx="148" cy="120" rx="18" ry="60" fill="rgba(255,255,255,0.12)" transform="rotate(-10 148 120)"/>
+      <!-- Stem -->
+      <ellipse cx="170" cy="44" rx="16" ry="12" fill="#2d6028"/>
+      <ellipse cx="170" cy="44" rx="10" ry="7" fill="#4a9040"/>
+      <!-- Tip nub -->
+      <ellipse cx="170" cy="292" rx="14" ry="8" fill="#2d6028"/>
+      <!-- Seeds visible through skin -->
+      <ellipse cx="162" cy="155" rx="5" ry="3" fill="rgba(212,180,74,0.5)" transform="rotate(-15 162 155)"/>
+      <ellipse cx="178" cy="178" rx="5" ry="3" fill="rgba(212,180,74,0.5)" transform="rotate(10 178 178)"/>
+      <ellipse cx="160" cy="200" rx="4" ry="2.5" fill="rgba(212,180,74,0.4)" transform="rotate(-5 160 200)"/>
+      <!-- Stars/sparkles -->
+      <text x="240" y="90" font-size="22" fill="#d4b44a" opacity="0.8">✦</text>
+      <text x="80" y="220" font-size="14" fill="#8bc34a" opacity="0.6">✦</text>
+      <text x="260" y="200" font-size="10" fill="#d4b44a" opacity="0.5">✦</text>
+    </svg>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><div class="marquee-dot"></div>Classic Dill</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Spicy Habanero</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Garlic Crunch</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Bread & Butter</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Sweet & Sour</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Kimchi Style</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Lemon Zest</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Wild Ferment</div>
+    <!-- repeat for seamless loop -->
+    <div class="marquee-item"><div class="marquee-dot"></div>Classic Dill</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Spicy Habanero</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Garlic Crunch</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Bread & Butter</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Sweet & Sour</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Kimchi Style</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Lemon Zest</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>Wild Ferment</div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-text reveal">
+    <p class="section-label">Our Story</p>
+    <h2 class="section-title">Pickled to <em>Perfection</em><br>Since 1987</h2>
+    <p class="section-body">
+      What started as a grandmother's basement experiment with garden cucumbers and a handwritten brine recipe has grown into a beloved pickle tradition. Every jar is still made by hand — no shortcuts, no preservatives, just pure fermented crunch.
+    </p>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-num">37</span>
+        <span class="stat-label">Years Brining</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">12</span>
+        <span class="stat-label">Unique Flavours</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">50k</span>
+        <span class="stat-label">Happy Jars</span>
+      </div>
+    </div>
+  </div>
+  <div class="about-visual">
+    <!-- Jar SVG -->
+    <svg class="jar-svg" viewBox="0 0 260 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Lid -->
+      <rect x="60" y="30" width="140" height="25" rx="5" fill="#d4b44a"/>
+      <rect x="65" y="22" width="130" height="18" rx="4" fill="#c4a43a"/>
+      <!-- Jar body -->
+      <path d="M55 55 Q45 70 40 120 L40 270 Q40 290 60 290 L200 290 Q220 290 220 270 L220 120 Q215 70 205 55 Z" fill="#e8f5e0"/>
+      <path d="M55 55 Q45 70 40 120 L40 270 Q40 290 60 290 L200 290 Q220 290 220 270 L220 120 Q215 70 205 55 Z" fill="url(#jarGrad)" opacity="0.8"/>
+      <!-- Brine fill -->
+      <path d="M42 140 L42 270 Q42 288 62 288 L198 288 Q218 288 218 270 L218 140 Z" fill="#c8e6a0" opacity="0.6"/>
+      <!-- Pickles inside jar -->
+      <ellipse cx="100" cy="200" rx="22" ry="55" fill="#4a9040" transform="rotate(-15 100 200)"/>
+      <ellipse cx="100" cy="200" rx="18" ry="51" fill="#5aaa4e" transform="rotate(-15 100 200)"/>
+      <ellipse cx="155" cy="195" rx="20" ry="52" fill="#3a8030" transform="rotate(10 155 195)"/>
+      <ellipse cx="155" cy="195" rx="16" ry="48" fill="#4a9040" transform="rotate(10 155 195)"/>
+      <ellipse cx="128" cy="215" rx="18" ry="48" fill="#5aaa4e" transform="rotate(-5 128 215)"/>
+      <!-- Bumps on pickles -->
+      <circle cx="92" cy="175" r="4" fill="#3a7a30" opacity="0.7"/>
+      <circle cx="105" cy="200" r="3.5" fill="#6aba5e" opacity="0.7"/>
+      <circle cx="95" cy="220" r="4" fill="#3a7a30" opacity="0.7"/>
+      <circle cx="148" cy="185" r="3.5" fill="#6aba5e" opacity="0.7"/>
+      <circle cx="160" cy="205" r="4" fill="#3a7a30" opacity="0.7"/>
+      <!-- Jar highlight -->
+      <ellipse cx="80" cy="150" rx="14" ry="60" fill="rgba(255,255,255,0.3)" transform="rotate(-8 80 150)"/>
+      <!-- Label -->
+      <rect x="65" y="100" width="130" height="55" rx="4" fill="rgba(245,240,232,0.9)" stroke="#d4b44a" stroke-width="1.5"/>
+      <text x="130" y="122" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" font-weight="700" fill="#1a3a1a">The Pickle Jar</text>
+      <text x="130" y="138" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#4a8c3f" letter-spacing="2">ARTISAN · DILL</text>
+      <line x1="75" y1="144" x2="185" y2="144" stroke="#d4b44a" stroke-width="0.8"/>
+      <text x="130" y="153" text-anchor="middle" font-family="DM Mono, monospace" font-size="6" fill="#7a8a6a">EST. 1987</text>
+      <!-- Defs -->
+      <defs>
+        <linearGradient id="jarGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a3a1a" stop-opacity="0.1"/>
+          <stop offset="40%" stop-color="white" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#1a3a1a" stop-opacity="0.15"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products" id="products">
+  <div class="products-header reveal">
+    <div>
+      <p class="section-label">Our Collection</p>
+      <h2 class="section-title">Pick Your <em>Crunch</em></h2>
+    </div>
+    <a href="#" style="font-family:'DM Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--green-bright);text-decoration:none;">View All →</a>
+  </div>
+  <div class="products-grid reveal">
+    <!-- Card 1 -->
+    <div class="product-card">
+      <div class="product-img" style="background:#e8f5e0;">
+        <svg viewBox="0 0 160 200" fill="none">
+          <ellipse cx="80" cy="100" rx="38" ry="85" fill="#4a9040"/>
+          <ellipse cx="80" cy="100" rx="33" ry="80" fill="#5aaa4e"/>
+          <circle cx="65" cy="70" r="6" fill="#3a7a30" opacity="0.7"/>
+          <circle cx="92" cy="95" r="5" fill="#6aba5e" opacity="0.7"/>
+          <circle cx="68" cy="120" r="6" fill="#3a7a30" opacity="0.7"/>
+          <ellipse cx="80" cy="22" rx="12" ry="8" fill="#2d6028"/>
+          <ellipse cx="80" cy="178" rx="10" ry="6" fill="#2d6028"/>
+          <text x="115" y="45" font-size="18" fill="#d4b44a">✦</text>
+        </svg>
+      </div>
+      <div class="product-info">
+        <p class="product-tag">Bestseller</p>
+        <h3 class="product-name">Classic Dill</h3>
+        <p class="product-desc">The OG. Garden-fresh cucumbers in our signature dill brine with a satisfying crunch that never quits.</p>
+        <div class="product-footer">
+          <span class="product-price">$8.99</span>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="product-card">
+      <div class="product-img" style="background:#fff0e0;">
+        <svg viewBox="0 0 160 200" fill="none">
+          <ellipse cx="80" cy="100" rx="38" ry="85" fill="#8b5a00"/>
+          <ellipse cx="80" cy="100" rx="33" ry="80" fill="#c4700a"/>
+          <ellipse cx="80" cy="100" rx="28" ry="75" fill="#d4844a"/>
+          <circle cx="65" cy="72" r="6" fill="#a06020" opacity="0.8"/>
+          <circle cx="94" cy="98" r="5" fill="#e09060" opacity="0.7"/>
+          <circle cx="68" cy="124" r="6" fill="#a06020" opacity="0.8"/>
+          <ellipse cx="80" cy="22" rx="10" ry="7" fill="#5a3800"/>
+          <ellipse cx="80" cy="178" rx="9" ry="5" fill="#5a3800"/>
+          <text x="108" y="50" font-size="16" fill="#ff6030">🔥</text>
+        </svg>
+      </div>
+      <div class="product-info">
+        <p class="product-tag">🔥 Spicy</p>
+        <h3 class="product-name">Fiery Habanero</h3>
+        <p class="product-desc">For thrill seekers only. Sun-dried habaneros infused deep into every slice. Sweet heat, real burn.</p>
+        <div class="product-footer">
+          <span class="product-price">$10.99</span>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="product-card">
+      <div class="product-img" style="background:#f0e8d0;">
+        <svg viewBox="0 0 160 200" fill="none">
+          <ellipse cx="80" cy="100" rx="38" ry="85" fill="#4a9040"/>
+          <ellipse cx="80" cy="100" rx="33" ry="80" fill="#5aaa4e"/>
+          <!-- garlic clove shapes -->
+          <ellipse cx="60" cy="85" rx="12" ry="16" fill="#f5f0e8" opacity="0.8" transform="rotate(15 60 85)"/>
+          <ellipse cx="95" cy="110" rx="11" ry="15" fill="#f5f0e8" opacity="0.8" transform="rotate(-10 95 110)"/>
+          <ellipse cx="70" cy="125" rx="10" ry="13" fill="#f5f0e8" opacity="0.7" transform="rotate(5 70 125)"/>
+          <circle cx="65" cy="68" r="5" fill="#3a7a30" opacity="0.7"/>
+          <ellipse cx="80" cy="22" rx="12" ry="8" fill="#2d6028"/>
+          <text x="112" y="48" font-size="14" fill="#d4b44a">★</text>
+        </svg>
+      </div>
+      <div class="product-info">
+        <p class="product-tag">Staff Pick</p>
+        <h3 class="product-name">Roasted Garlic</h3>
+        <p class="product-desc">Slow-roasted garlic cloves marry with our dill brine for something deeply aromatic and utterly addictive.</p>
+        <div class="product-footer">
+          <span class="product-price">$11.49</span>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <p class="section-label reveal">How We Make It</p>
+  <h2 class="section-title reveal">From Garden to <em>Glass</em></h2>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3 class="step-title">Harvest</h3>
+      <p class="step-desc">We source only the crispest, freshest cucumbers from local family farms — picked at peak ripeness each morning.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3 class="step-title">Brine</h3>
+      <p class="step-desc">Our secret brine — pure water, natural sea salt, fresh dill, and spices — is prepared fresh for every batch.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3 class="step-title">Ferment</h3>
+      <p class="step-desc">Patience is our secret ingredient. Each batch ferments slowly for 7–14 days for maximum probiotic goodness.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3 class="step-title">Jar & Ship</h3>
+      <p class="step-desc">Hand-packed into glass jars and shipped straight to your door within 48 hours of completion. Always fresh.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="testimonials-header reveal">
+    <p class="section-label">What People Say</p>
+    <h2 class="section-title">Pickle <em>Fanatics</em> Agree</h2>
+  </div>
+  <div class="testimonials-grid reveal">
+    <div class="tcard">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">I've tried every artisan pickle on the market and nothing comes close. The classic dill has the most satisfying crunch and the brine is just perfectly balanced.</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar">S</div>
+        <div>
+          <div class="tcard-name">Sophia R.</div>
+          <div class="tcard-location">New York, NY</div>
+        </div>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">The habanero pickle is INSANE. Hot, crunchy, tangy all at once. I put it on everything now — burgers, sandwiches, scrambled eggs. Life-changing condiment.</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar">M</div>
+        <div>
+          <div class="tcard-name">Marcus T.</div>
+          <div class="tcard-location">Austin, TX</div>
+        </div>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">My family does a jar a week. The kids love the bread and butter variety and I'm obsessed with the roasted garlic. Best subscription we have — no contest.</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar">L</div>
+        <div>
+          <div class="tcard-name">Laura K.</div>
+          <div class="tcard-location">Portland, OR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner reveal" id="contact">
+  <div>
+    <h2 class="cta-title">Ready to get<br><em>pickled?</em></h2>
+    <p class="cta-subtitle">Free shipping on orders over $35. Join 50,000+ pickle lovers who get our small-batch jars delivered fresh to their door.</p>
+  </div>
+  <button class="btn-dark">Start Your Order →</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">The <span>Pickle</span> Jar</div>
+      <p class="footer-tagline">Small-batch artisan pickles crafted with heirloom cucumbers and old-world brining traditions. Est. 1987.</p>
+    </div>
+    <div>
+      <p class="footer-col-title">Shop</p>
+      <ul class="footer-links">
+        <li><a href="#">Classic Dill</a></li>
+        <li><a href="#">Spicy Habanero</a></li>
+        <li><a href="#">Roasted Garlic</a></li>
+        <li><a href="#">Bread & Butter</a></li>
+        <li><a href="#">Gift Boxes</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Company</p>
+      <ul class="footer-links">
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">The Farm</a></li>
+        <li><a href="#">Wholesale</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Careers</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Support</p>
+      <ul class="footer-links">
+        <li><a href="#">Shipping Info</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Subscriptions</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2024 The Pickle Jar. All rights reserved.</p>
+    <div class="social-row">
+      <a class="social-btn" href="#">IG</a>
+      <a class="social-btn" href="#">FB</a>
+      <a class="social-btn" href="#">TT</a>
+      <a class="social-btn" href="#">YT</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Intersection Observer for reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Duplicate marquee for seamless loop
+  const track = document.querySelector('.marquee-track');
+  track.innerHTML += track.innerHTML;
+</script>
+</body>
+</html>
